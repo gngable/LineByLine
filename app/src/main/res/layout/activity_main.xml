@@ -1,18 +1,331 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.mercangelsorfware.linebyline.MainActivity">
+    android:gravity="top"
+    android:orientation="vertical"
+    >
+
+    <ScrollView android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.31">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/distance_label"
+                android:text="0.0"
+                android:onClick="aboutButtonClick"
+                android:textSize="70sp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="mi"
+                android:textSize="15sp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/avg_speed_label"
+                    android:text="0.0 mph av"
+                    android:textSize="30sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"/>
+
+
+                <TextView
+                    android:id="@+id/route_time_label"
+                    android:text="00:00:00"
+                    android:textSize="30sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp"
+                android:background="@android:color/darker_gray"/>
+
+            <TextView
+                android:id="@+id/longitude_label"
+                android:text="GPS initializing..."
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/latitude_label"
+                android:text=""
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/altitude_label"
+                android:text=""
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/accuracy_label"
+                android:text=""
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/bearing_label"
+                android:text=""
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/speed_label"
+                android:text=""
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/time_label"
+                android:text=""
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/gps_status_label"
+                android:text=""
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </ScrollView>
+
+
+
+
+
+    <!--LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:text="Name:"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
 
-</android.support.constraint.ConstraintLayout>
+    <EditText
+    android:id="@+id/waypoint_name"
+    android:layout_weight="1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+
+    <Button
+    android:id="@+id/waypoint_button"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:onClick="waypointButtonClick"
+    android:textSize="20sp"
+    android:background="?android:colorBackground"
+    android:text="Save"/>
+
+    </LinearLayout>
+
+    <View
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
+    android:background="@android:color/darker_gray"/>
+
+    <TextView
+    android:textSize="20sp"
+    android:text="Route"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+    android:text="Name:"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+
+    <EditText
+    android:id="@+id/route_name"
+    android:layout_weight="1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <Button
+    android:id="@+id/route_start_button"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:onClick="routeStartButtonClick"
+    android:textSize="20sp"
+    android:background="?android:colorBackground"
+    android:text="Start"/>
+
+    <Button
+    android:id="@+id/route_stop_button"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:onClick="routeStopButtonClick"
+    android:textSize="20sp"
+    android:background="?android:colorBackground"
+    android:text="Stop/Save"/>
+
+    </LinearLayout>
+
+    <View
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
+    android:background="@android:color/darker_gray"/>
+
+    <TextView
+    android:textSize="20sp"
+    android:text="Save to File"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <EditText
+    android:id="@+id/save_file_name"
+    android:layout_weight="1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+
+    <Button
+    android:id="@+id/save_button"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:onClick="saveButtonClick"
+    android:textSize="20sp"
+    android:background="?android:colorBackground"
+    android:text="Save"/>
+
+    </LinearLayout-->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="3dp"
+        android:background="@android:color/darker_gray"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/start_over_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="waypointButtonClick"
+            android:textSize="20sp"
+            android:background="?android:colorBackground"
+            android:text="Start\nOver"/>
+
+        <Button
+            android:id="@+id/hallway_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="routeStartButtonClick"
+            android:textSize="30sp"
+            android:background="?android:colorBackground"
+            android:layout_weight="1"
+            android:text="Add Hallway"/>
+
+        <Button
+            android:id="@+id/email_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:onClick="mapButtonClick"
+            android:textSize="20sp"
+            android:background="?android:colorBackground"
+            android:text="\@"/>
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/waypoint_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="waypointButtonClick"
+            android:textSize="20sp"
+            android:background="?android:colorBackground"
+            android:text="Mark\nSpot"/>
+
+        <Button
+            android:id="@+id/route_start_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="routeStartButtonClick"
+            android:textSize="65sp"
+            android:background="?android:colorBackground"
+            android:layout_weight="1"
+            android:text="Start"/>
+
+        <Button
+            android:id="@+id/map_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:onClick="mapButtonClick"
+            android:textSize="20sp"
+            android:background="?android:colorBackground"
+            android:text="Map"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>
