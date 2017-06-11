@@ -25,11 +25,11 @@
                 android:layout_height="wrap_content" />
 
             <TextView
-                android:text="mi"
-                android:textSize="15sp"
-                android:layout_gravity="center"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Feet"
+                android:textSize="15sp" />
 
 
             <LinearLayout
@@ -52,8 +52,8 @@
 
 
                 <TextView
-                    android:id="@+id/route_time_label"
-                    android:text="00:00:00"
+                    android:id="@+id/sq_feet_label"
+                    android:text="0 sq ft"
                     android:textSize="30sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -66,6 +66,13 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginBottom="3dp"
                 android:background="@android:color/darker_gray"/>
+
+            <TextView
+                android:id="@+id/height_label"
+                android:text="Height not set"
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/longitude_label"
@@ -102,12 +109,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/speed_label"
-                android:text=""
-                android:textSize="20sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <!--<TextView-->
+                <!--android:id="@+id/speed_label"-->
+                <!--android:text=""-->
+                <!--android:textSize="20sp"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content" />-->
 
             <TextView
                 android:id="@+id/time_label"
@@ -264,20 +271,20 @@
             android:id="@+id/start_over_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:onClick="waypointButtonClick"
-            android:textSize="20sp"
             android:background="?android:colorBackground"
-            android:text="Start\nOver"/>
+            android:onClick="startOverButtonClick"
+            android:text="Start\nOver"
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/hallway_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="routeStartButtonClick"
-            android:textSize="30sp"
-            android:background="?android:colorBackground"
             android:layout_weight="1"
-            android:text="Add Hallway"/>
+            android:background="?android:colorBackground"
+            android:onClick="hallwayButtonClick"
+            android:text="Add Hallway"
+            android:textSize="30sp" />
 
         <Button
             android:id="@+id/email_button"
@@ -300,10 +307,10 @@
             android:id="@+id/waypoint_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:onClick="waypointButtonClick"
-            android:textSize="20sp"
             android:background="?android:colorBackground"
-            android:text="Mark\nSpot"/>
+            android:onClick="setHeightButtonClick"
+            android:text="Set\nHeight"
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/route_start_button"

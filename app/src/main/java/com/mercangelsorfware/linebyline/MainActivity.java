@@ -45,18 +45,20 @@ public class MainActivity extends Activity
     TextView altitudeLabel;
     TextView accuracyLabel;
     TextView bearingLabel;
-    TextView speedLabel;
     TextView timeLabel;
     TextView gpsStatusLabel;
     TextView distanceLabel;
-    TextView routeTimeLabel;
-    TextView avgSpeedLabel;
+    TextView squareFeetLabel;
+    TextView heightLabel;
     Button routeStartButton;
+    Button hallwayButton;
 
     LocationManager locationManager = null;
 
     Location lastLocation;
     int lastStatus = -1;
+
+    double height = Double.NaN;
 
     ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
 
@@ -81,13 +83,13 @@ public class MainActivity extends Activity
         altitudeLabel = (TextView)findViewById(R.id.altitude_label);
         bearingLabel = (TextView)findViewById(R.id.bearing_label);
         accuracyLabel = (TextView)findViewById(R.id.accuracy_label);
-        speedLabel = (TextView)findViewById(R.id.speed_label);
         timeLabel = (TextView)findViewById(R.id.time_label);
         gpsStatusLabel = (TextView)findViewById(R.id.gps_status_label);
         distanceLabel = (TextView)findViewById(R.id.distance_label);
-        routeTimeLabel = (TextView)findViewById(R.id.route_time_label);
-        avgSpeedLabel = (TextView)findViewById(R.id.avg_speed_label);
+        squareFeetLabel = (TextView)findViewById(R.id.sq_feet_label);
+        heightLabel = (TextView)findViewById(R.id.height_label);
         routeStartButton = (Button)findViewById(R.id.route_start_button);
+        hallwayButton = (Button)findViewById(R.id.hallway_button);
 
         locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
 
@@ -126,6 +128,38 @@ public class MainActivity extends Activity
                     1);
         } else setUpLocationUpdates();
 
+        //setUpSensorUpdates();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setUpLocationUpdates();
+                } else {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                    dialog.setMessage("This app requires access to your device location to function. Please restart and grant permission");
+                    dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt)
+                        {
+                            System.exit(0);
+                        }
+                    });
+
+                    dialog.show();
+                }
+                return;
+            }
+        }
+    }
+
+    private void setUpSensorUpdates(){
         final SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         SensorEventListener sensorListener = new SensorEventListener(){
@@ -148,8 +182,6 @@ public class MainActivity extends Activity
                 {
                     System.arraycopy(event.values, 0, magnetometerReading,
                             0, magnetometerReading.length);
-
-                    //toast("M " + mMagnetometerReading[0] + " " + mMagnetometerReading[1] + " " + mMagnetometerReading[2], true);
                 }
 
                 sensorManager.getRotationMatrix(mRotationMatrix, null,
@@ -224,46 +256,8 @@ public class MainActivity extends Activity
             @Override
             public void onAccuracyChanged(Sensor p1, int p2)
             {
-                // TODO: Implement this method
             }
-
-
         };
-        //sensorManager.registerListener(sensorListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(sensorListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(sensorListener, Sensor.TYPE_MAGNETIC_FIELD,
-        //							SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
-
-
-        //sensorManager.r
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    setUpLocationUpdates();
-                } else {
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-                    dialog.setMessage("This app requires access to your device location to function. Please restart and grant permission");
-                    dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface paramDialogInterface, int paramInt)
-                        {
-                            System.exit(0);
-                        }
-                    });
-
-                    dialog.show();
-                }
-                return;
-            }
-        }
     }
 
     private void setUpLocationUpdates(){
@@ -273,6 +267,8 @@ public class MainActivity extends Activity
                 @Override
                 public void onLocationChanged(Location location) {
                     final Location loc = location;
+
+                    if (lastLocation != null && loc.distanceTo(lastLocation) < 0.5) return;
 
                     lastLocation = location;
 
@@ -321,7 +317,7 @@ public class MainActivity extends Activity
                     final Date date = new Date(loc.getTime());
 
                     if (recordingRoute) {
-                        if (lastRouteLocation == null || lastRouteLocation.distanceTo(loc) > 1.0) {
+                        //if (lastRouteLocation == null || lastRouteLocation.distanceTo(loc) > 1.0) {
                             if (!routeData.containsKey(currentRouteName)) {
                                 routeData.put(currentRouteName, new ArrayList<Waypoint>());
                             }
@@ -332,7 +328,7 @@ public class MainActivity extends Activity
                                 routeLength += (lastRouteLocation.distanceTo(loc));
 
                             lastRouteLocation = loc;
-                        }
+                        //}
                     }
 
                     gpsStatusLabel.post(new Runnable() {
@@ -341,31 +337,32 @@ public class MainActivity extends Activity
                             latitudeLabel.setText("Latitude: " + loc.getLatitude());
                             longitudeLabel.setText("Longitude: " + loc.getLongitude());
                             altitudeLabel.setText("Altitude: " + String.format("%.2f", loc.getAltitude() * 3.28084) + "ft");
-
                             accuracyLabel.setText("Accuracy: " + accuracylbl);
+
                             if (bearinglbl != null)
                                 bearingLabel.setText("Direction of travel: " + bearinglbl);
-                            speedLabel.setText("Speed: " + String.format("%.2f", loc.getSpeed() * 2.23694) + " mph");
+
                             timeLabel.setText("GPS Date: " + date.toLocaleString());
 
                             if (recordingRoute) {
-                                double distance = routeLength * 0.000621371;
+                                double distance = routeLength * 3.28084;
                                 distanceLabel.setText(String.format("%.2f", distance));
+                                squareFeetLabel.setText(String.format("%.2f sq ft", distance * height));
 
-                                long time = (System.currentTimeMillis() - startTime);
+//                                long time = (System.currentTimeMillis() - startTime);
+//
+//                                long hours = TimeUnit.MILLISECONDS.toHours(time) % 24;
+//                                long minutes = TimeUnit.MILLISECONDS.toMinutes(time) % 60;
+//                                long seconds = TimeUnit.MILLISECONDS.toSeconds(time) % 60;
+//
+//                                String t = String.format("%02d:%02d:%02d",
+//                                        hours, minutes, seconds);
 
-                                long hours = TimeUnit.MILLISECONDS.toHours(time) % 24;
-                                long minutes = TimeUnit.MILLISECONDS.toMinutes(time) % 60;
-                                long seconds = TimeUnit.MILLISECONDS.toSeconds(time) % 60;
+                                //routeTimeLabel.setText(t);
 
-                                String t = String.format("%02d:%02d:%02d",
-                                        hours, minutes, seconds);
+                                //double ms = routeLength / (time / 1000);
 
-                                routeTimeLabel.setText(t);
-
-                                double ms = routeLength / (time / 1000);
-
-                                avgSpeedLabel.setText(String.format("%.2f", (ms * 2.23694)) + " mph av");
+                                //avgSpeedLabel.setText(String.format("%.2f", (ms * 2.23694)) + " mph av");
                             }
                         }
                     });
@@ -392,12 +389,10 @@ public class MainActivity extends Activity
 
                 @Override
                 public void onProviderEnabled(String p1) {
-                    // TODO: Implement this method
                 }
 
                 @Override
                 public void onProviderDisabled(String p1) {
-                    // TODO: Implement this method
                 }
             });
         }catch(SecurityException ex)
@@ -414,10 +409,10 @@ public class MainActivity extends Activity
         }
     }
 
-    public void waypointButtonClick(View view)
+    public void setHeightButtonClick(View view)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Enter a name?");
+        builder.setTitle("Enter height");
 
         final EditText input = new EditText(this);
 
@@ -428,15 +423,13 @@ public class MainActivity extends Activity
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
-                String name = input.getText().toString();
-                Waypoint waypoint = new Waypoint(name, lastLocation);
-                waypoints.add(waypoint);
+            try {
+                String h = input.getText().toString();
+                height = Double.parseDouble(h);
+                heightLabel.setText("Height: " + h + " feet");
+            } catch (Exception ex){
 
-                ArrayList<Waypoint> wpl = new ArrayList();
-
-                wpl.add(waypoint);
-
-                SaveKML(wpl, null, name);
+            }
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -452,63 +445,133 @@ public class MainActivity extends Activity
         hideKeyboard(view);
     }
 
+    public void startOverButtonClick(View view){
+        segment = 0;
+        routeLength = 0.0;
+        lastRouteLocation = null;
+        currentRouteName = null;
+        recordingRoute = false;
+        routeStartButton.setText("Start");
+        distanceLabel.setText("0.0");
+        squareFeetLabel.setText("0.0 sq ft");
+
+        //TODO: clear out labels
+    }
+
+    private int segment = 0;
+
     public void routeStartButtonClick(View view)
     {
-        if (routeStartButton.getText() != "Stop")
+        if (routeStartButton.getText().equals("Start"))
         {
             routeLength = 0.0;
-            currentRouteName = "Route";
-            recordingRoute = true;
             startTime = System.currentTimeMillis();
 
-            routeStartButton.setText("Stop");
-
             Toast.makeText(getApplicationContext(), "Route started", Toast.LENGTH_LONG).show();
+        }
+
+        if (routeStartButton.getText().equals("Start") || routeStartButton.getText() == "Resume") {
+            segment++;
+            lastRouteLocation = null;
+            currentRouteName = Integer.toString(segment);
+            recordingRoute = true;
+            routeStartButton.setText("Pause");
+            hallwayButton.setEnabled(false);
         }
         else
         {
             recordingRoute = false;
-            routeStartButton.setText("Start");
+            routeStartButton.setText("Resume");
+            hallwayButton.setEnabled(true);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Name and save route?");
-
-            final EditText input = new EditText(this);
-
-            input.setInputType(InputType.TYPE_CLASS_TEXT);
-            builder.setView(input);
-
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    String name = input.getText().toString();
-
-                    HashMap<String, ArrayList<Waypoint>> rds = new HashMap<String, ArrayList<Waypoint>>();
-
-                    rds.put(currentRouteName, routeData.get(currentRouteName));
-
-                    CurrentKML = SaveKML(waypoints, rds, name);
-
-                    routeData.clear();
-                    waypoints.clear();
-                    displayRouteStats();
-                    showDialog("Save complete: " + CurrentKML);
-                }
-            });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    dialog.cancel();
-                    routeData.clear();
-                    waypoints.clear();
-                    displayRouteStats();
-                }
-            });
-
-            builder.show();
+//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//            builder.setTitle("Name and save route?");
+//
+//            final EditText input = new EditText(this);
+//
+//            input.setInputType(InputType.TYPE_CLASS_TEXT);
+//            builder.setView(input);
+//
+//            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which)
+//                {
+//                    String name = input.getText().toString();
+//
+//                    HashMap<String, ArrayList<Waypoint>> rds = new HashMap<String, ArrayList<Waypoint>>();
+//
+//                    rds.put(currentRouteName, routeData.get(currentRouteName));
+//
+//                    CurrentKML = SaveKML(waypoints, rds, name);
+//
+//                    routeData.clear();
+//                    waypoints.clear();
+//                    displayRouteStats();
+//                    showDialog("Save complete: " + CurrentKML);
+//                }
+//            });
+//            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which)
+//                {
+//                    dialog.cancel();
+//                    routeData.clear();
+//                    waypoints.clear();
+//                    displayRouteStats();
+//                }
+//            });
+//
+//            builder.show();
         }
+    }
+
+    private Location hallwayBeginning = null;
+
+    public void hallwayButtonClick(View view){
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Go to beginning of hallway");
+        builder.setMessage("Click ok when at the beginning of the hallway.");
+
+        final MainActivity theMain = this;
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                hallwayBeginning = lastLocation;
+                AlertDialog.Builder dialog2 = new AlertDialog.Builder(theMain);
+                dialog2.setTitle("Go to end of hallway");
+                dialog2.setMessage("Click ok when at the end of the hallway.");
+                dialog2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt)
+                    {
+                        Location hallwayEnd = lastLocation;
+
+                        final double hallwaydistance = hallwayBeginning.distanceTo(hallwayEnd);
+
+                        AlertDialog.Builder dialog3 = new AlertDialog.Builder(theMain);
+                        dialog3.setTitle("Hallway length");
+                        dialog3.setMessage("Hallway length is " + hallwaydistance * 3.28084 + " ft. Sound right?");
+                        dialog3.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt){
+                                routeLength += hallwaydistance;
+                                final double distance = routeLength * 3.28084;
+                                distanceLabel.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        distanceLabel.setText(String.format("%.2f", distance));
+                                    }
+                                });
+                            }
+                        });
+
+                    }
+                });
+            }
+        });
+
+        builder.show();
     }
 
     private void displayKML(String kml){
