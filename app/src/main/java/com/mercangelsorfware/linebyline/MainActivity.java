@@ -22,8 +22,10 @@
 
 package com.mercangelsorfware.linebyline;
 
+import android.Manifest;
 import android.app.*;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.location.*;
 import android.os.*;
 import android.view.*;
@@ -50,6 +52,8 @@ public class MainActivity extends Activity
     TextView routeTimeLabel;
     TextView avgSpeedLabel;
     Button routeStartButton;
+
+    LocationManager locationManager = null;
 
     Location lastLocation;
     int lastStatus = -1;
@@ -85,13 +89,13 @@ public class MainActivity extends Activity
         avgSpeedLabel = (TextView)findViewById(R.id.avg_speed_label);
         routeStartButton = (Button)findViewById(R.id.route_start_button);
 
-        LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
+        locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
 
         boolean gps_enabled = false;
 
         try
         {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         }
         catch (Exception ex)
         {
@@ -114,8 +118,157 @@ public class MainActivity extends Activity
             dialog.show();
         }
 
+        int permissionCheck = this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if (permissionCheck == PackageManager.PERMISSION_DENIED) {
+            this.requestPermissions(
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    1);
+        } else setUpLocationUpdates();
+
+        final SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+        SensorEventListener sensorListener = new SensorEventListener(){
+
+            private final float[] accelerometerReading = new float[3];
+            private final float[] magnetometerReading = new float[3];
+
+            private final float[] mRotationMatrix = new float[9];
+            private final float[] mOrientationAngles = new float[3];
+
+            @Override
+            public void onSensorChanged(SensorEvent event)
+            {
+                if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                {
+                    System.arraycopy(event.values, 0, accelerometerReading,
+                            0, accelerometerReading.length);
+                }
+                else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+                {
+                    System.arraycopy(event.values, 0, magnetometerReading,
+                            0, magnetometerReading.length);
+
+                    //toast("M " + mMagnetometerReading[0] + " " + mMagnetometerReading[1] + " " + mMagnetometerReading[2], true);
+                }
+
+                sensorManager.getRotationMatrix(mRotationMatrix, null,
+                        accelerometerReading, magnetometerReading);
+
+                // "mRotationMatrix" now has up-to-date information.
+
+                sensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
+
+                final float[] rotationMatrix = new float[9];
+                sensorManager.getRotationMatrix(rotationMatrix, null,
+                        accelerometerReading, magnetometerReading);
+
+// Express the updated rotation matrix as three orientation angles.
+                final float[] orientationAngles = new float[3];
+                sensorManager.getOrientation(rotationMatrix, orientationAngles);
+
+
+                String bearing = "";
+                double bear = orientationAngles[0] * 180 / Math.PI;
+
+                if (bear < 0) bear = 180 - bear;
+
+                float fourtyfivehalf = 45 / 2;
+
+                if (bear <= fourtyfivehalf && bear > -fourtyfivehalf)
+                {
+                    bearing = "N";
+                }
+                else if (bear <= 45 + fourtyfivehalf && bear > 45 - fourtyfivehalf)
+                {
+                    bearing = "NE";
+                }
+                else if (bear <= 90 + fourtyfivehalf && bear > 90 - fourtyfivehalf)
+                {
+                    bearing = "E";
+                }
+                else if (bear <= 135 + fourtyfivehalf && bear > 135 - fourtyfivehalf)
+                {
+                    bearing = "SE";
+                }
+                else if (bear <= 180 + fourtyfivehalf && bear > 180 - fourtyfivehalf)
+                {
+                    bearing = "S";
+                }
+                else if (bear <= 225 + fourtyfivehalf && bear > 225 - fourtyfivehalf)
+                {
+                    bearing = "SW";
+                }
+                else if (bear <= 270 + fourtyfivehalf && bear > 270 - fourtyfivehalf)
+                {
+                    bearing = "W";
+                }
+                else if (bear <= 315 + fourtyfivehalf && bear > 315 - fourtyfivehalf)
+                {
+                    bearing = "NW";
+                }
+
+                bearing += " (" + bear + ")";
+
+                final String bearinglbl = bearing;
+
+                gpsStatusLabel.post(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        bearingLabel.setText("Direction of travel: " + bearinglbl);
+                    }
+                });
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor p1, int p2)
+            {
+                // TODO: Implement this method
+            }
+
+
+        };
+        //sensorManager.registerListener(sensorListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
+        //sensorManager.registerListener(sensorListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        //sensorManager.registerListener(sensorListener, Sensor.TYPE_MAGNETIC_FIELD,
+        //							SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+
+
+        //sensorManager.r
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setUpLocationUpdates();
+                } else {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                    dialog.setMessage("This app requires access to your device location to function. Please restart and grant permission");
+                    dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt)
+                        {
+                            System.exit(0);
+                        }
+                    });
+
+                    dialog.show();
+                }
+                return;
+            }
+        }
+    }
+
+    private void setUpLocationUpdates(){
         try {
-            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, new LocationListener() {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, new LocationListener() {
 
                 @Override
                 public void onLocationChanged(Location location) {
@@ -249,119 +402,16 @@ public class MainActivity extends Activity
             });
         }catch(SecurityException ex)
         {
-
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("Problem setting up location updates: " + ex.getMessage());
+            dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt)
+                {
+                    System.exit(0);
+                }
+            });
         }
-
-        final SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-        SensorEventListener sensorListener = new SensorEventListener(){
-
-            private final float[] accelerometerReading = new float[3];
-            private final float[] magnetometerReading = new float[3];
-
-            private final float[] mRotationMatrix = new float[9];
-            private final float[] mOrientationAngles = new float[3];
-
-            @Override
-            public void onSensorChanged(SensorEvent event)
-            {
-                if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-                {
-                    System.arraycopy(event.values, 0, accelerometerReading,
-                            0, accelerometerReading.length);
-                }
-                else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-                {
-                    System.arraycopy(event.values, 0, magnetometerReading,
-                            0, magnetometerReading.length);
-
-                    //toast("M " + mMagnetometerReading[0] + " " + mMagnetometerReading[1] + " " + mMagnetometerReading[2], true);
-                }
-
-                sensorManager.getRotationMatrix(mRotationMatrix, null,
-                        accelerometerReading, magnetometerReading);
-
-                // "mRotationMatrix" now has up-to-date information.
-
-                sensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
-
-                final float[] rotationMatrix = new float[9];
-                sensorManager.getRotationMatrix(rotationMatrix, null,
-                        accelerometerReading, magnetometerReading);
-
-// Express the updated rotation matrix as three orientation angles.
-                final float[] orientationAngles = new float[3];
-                sensorManager.getOrientation(rotationMatrix, orientationAngles);
-
-
-                String bearing = "";
-                double bear = orientationAngles[0] * 180 / Math.PI;
-
-                if (bear < 0) bear = 180 - bear;
-
-                float fourtyfivehalf = 45 / 2;
-
-                if (bear <= fourtyfivehalf && bear > -fourtyfivehalf)
-                {
-                    bearing = "N";
-                }
-                else if (bear <= 45 + fourtyfivehalf && bear > 45 - fourtyfivehalf)
-                {
-                    bearing = "NE";
-                }
-                else if (bear <= 90 + fourtyfivehalf && bear > 90 - fourtyfivehalf)
-                {
-                    bearing = "E";
-                }
-                else if (bear <= 135 + fourtyfivehalf && bear > 135 - fourtyfivehalf)
-                {
-                    bearing = "SE";
-                }
-                else if (bear <= 180 + fourtyfivehalf && bear > 180 - fourtyfivehalf)
-                {
-                    bearing = "S";
-                }
-                else if (bear <= 225 + fourtyfivehalf && bear > 225 - fourtyfivehalf)
-                {
-                    bearing = "SW";
-                }
-                else if (bear <= 270 + fourtyfivehalf && bear > 270 - fourtyfivehalf)
-                {
-                    bearing = "W";
-                }
-                else if (bear <= 315 + fourtyfivehalf && bear > 315 - fourtyfivehalf)
-                {
-                    bearing = "NW";
-                }
-
-                bearing += " (" + bear + ")";
-
-                final String bearinglbl = bearing;
-
-                gpsStatusLabel.post(new Runnable() {
-                    @Override
-                    public void run()
-                    {
-                        bearingLabel.setText("Direction of travel: " + bearinglbl);
-                    }
-                });
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor p1, int p2)
-            {
-                // TODO: Implement this method
-            }
-
-
-        };
-        //sensorManager.registerListener(sensorListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(sensorListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(sensorListener, Sensor.TYPE_MAGNETIC_FIELD,
-        //							SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
-
-
-        //sensorManager.r
     }
 
     public void waypointButtonClick(View view)
