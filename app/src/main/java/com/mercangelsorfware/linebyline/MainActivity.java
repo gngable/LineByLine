@@ -42,7 +42,6 @@ public class MainActivity extends Activity
 {
     TextView longitudeLabel;
     TextView latitudeLabel;
-    TextView altitudeLabel;
     TextView accuracyLabel;
     TextView bearingLabel;
     TextView timeLabel;
@@ -80,7 +79,6 @@ public class MainActivity extends Activity
 
         longitudeLabel = (TextView)findViewById(R.id.longitude_label);
         latitudeLabel = (TextView)findViewById(R.id.latitude_label);
-        altitudeLabel = (TextView)findViewById(R.id.altitude_label);
         bearingLabel = (TextView)findViewById(R.id.bearing_label);
         accuracyLabel = (TextView)findViewById(R.id.accuracy_label);
         timeLabel = (TextView)findViewById(R.id.time_label);
@@ -336,7 +334,6 @@ public class MainActivity extends Activity
                         public void run() {
                             latitudeLabel.setText("Latitude: " + loc.getLatitude());
                             longitudeLabel.setText("Longitude: " + loc.getLongitude());
-                            altitudeLabel.setText("Altitude: " + String.format("%.2f", loc.getAltitude() * 3.28084) + "ft");
                             accuracyLabel.setText("Accuracy: " + accuracylbl);
 
                             if (bearinglbl != null)
@@ -415,8 +412,7 @@ public class MainActivity extends Activity
         builder.setTitle("Enter height");
 
         final EditText input = new EditText(this);
-
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
         builder.setView(input);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -454,8 +450,9 @@ public class MainActivity extends Activity
         routeStartButton.setText("Start");
         distanceLabel.setText("0.0");
         squareFeetLabel.setText("0.0 sq ft");
-
-        //TODO: clear out labels
+        height = Double.NaN;
+        heightLabel.setText("Height not set");
+        routeData.clear();
     }
 
     private int segment = 0;
