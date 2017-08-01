@@ -536,6 +536,7 @@ public class MainActivity extends Activity
             public void onClick(DialogInterface dialog, int which)
             {
                 hallwayBeginning = lastLocation;
+
                 AlertDialog.Builder dialog2 = new AlertDialog.Builder(theMain);
                 dialog2.setTitle("Go to end of hallway");
                 dialog2.setMessage("Click ok when at the end of the hallway.");
@@ -554,17 +555,43 @@ public class MainActivity extends Activity
                             public void onClick(DialogInterface paramDialogInterface, int paramInt){
                                 routeLength += hallwaydistance;
                                 final double distance = routeLength * 3.28084;
-                                distanceLabel.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        distanceLabel.setText(String.format("%.2f", distance));
+
+                                AlertDialog.Builder dialog4 = new AlertDialog.Builder(theMain);
+                                dialog4.setTitle("How Many Hallways?");
+                                dialog4.setMessage("How many hallways are there?");
+
+                                final EditText input = new EditText(theMain);
+                                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                                dialog4.setView(input);
+                                //TODO: save number
+                                dialog4.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                        AlertDialog.Builder dialog5 = new AlertDialog.Builder(theMain);
+                                        dialog5.setTitle("How High?");
+                                        dialog5.setMessage("How high are the hallways?");
+                                        //TODO: save height
+                                        final EditText input = new EditText(theMain);
+                                        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                                        dialog5.setView(input);
+                                        dialog5.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+
+                                            }
+                                        });
+
+                                        dialog5.show();
                                     }
                                 });
+
+                                dialog4.show();
                             }
                         });
 
+                        dialog3.show();
                     }
                 });
+
+                dialog2.show();
             }
         });
 
